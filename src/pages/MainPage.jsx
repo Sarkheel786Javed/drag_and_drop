@@ -43,6 +43,7 @@ function MainPage() {
                   onDrop={handleDrop}
                   droppedItems={droppedItems}
                   setDroppedItems={setDroppedItems}
+                  setDragItems={setDragItems} // Pass setDragItems to DropZone
                 />
               </div>
               <div className="px-4">
@@ -80,35 +81,33 @@ const DragItem = ({ id, name, type }) => {
   }));
 
   return (
-    <>
-      <div
-        ref={drag}
-        className="card bg-light"
-        style={{
-          width: "18rem",
-          opacity: isDragging ? 0.5 : 1,
-          cursor: "move",
-        }}
-      >
-        <div className="card-header">
-          <h3 className="text-center">{name}</h3>
-        </div>
-        <div className="card-body">
-          <span className="text-center">
-            Lorem Ipsum has been the industry's standard dummy text ever since
-            the 1500s, when an unknown printer took a galley of type and
-            scrambled it to make a type specimen book.
-          </span>
-        </div>
-        <div className="card-footer">
-          <button className="btn bg-primary w-100">Remove</button>
-        </div>
+    <div
+      ref={drag}
+      className="card bg-light"
+      style={{
+        width: "18rem",
+        opacity: isDragging ? 0.5 : 1,
+        cursor: "move",
+      }}
+    >
+      <div className="card-header">
+        <h3 className="text-center">{name}</h3>
       </div>
-    </>
+      <div className="card-body">
+        <span className="text-center">
+          Lorem Ipsum has been the industry's standard dummy text ever since the
+          1500s, when an unknown printer took a galley of type and scrambled it
+          to make a type specimen book.
+        </span>
+      </div>
+      <div className="card-footer">
+        <button className="btn bg-primary w-100">Remove</button>
+      </div>
+    </div>
   );
 };
 
-const DropZone = ({ onDrop, droppedItems, setDroppedItems }) => {
+const DropZone = ({ onDrop, droppedItems, setDroppedItems, setDragItems }) => {
   const [{ canDrop, isOver }, drop] = useDrop(() => ({
     accept: "card",
     drop: (item) => onDrop(item),
@@ -121,9 +120,13 @@ const DropZone = ({ onDrop, droppedItems, setDroppedItems }) => {
   const isActive = canDrop && isOver;
 
   const handleRemoveItem = (index) => {
+    const removedItem = droppedItems[index]; // Get the removed item
     const updatedItems = [...droppedItems];
-    updatedItems.splice(index, 1);
+    updatedItems.splice(index, 1); // Remove the item from droppedItems
     setDroppedItems(updatedItems);
+
+    // Add the removed item back to dragItems
+    setDragItems((prevItems) => [...prevItems, removedItem]);
   };
 
   return (
@@ -140,7 +143,7 @@ const DropZone = ({ onDrop, droppedItems, setDroppedItems }) => {
       <div className="p-4 text-center">
         {isActive ? "Release to drop" : "Drag a card here"}
       </div>
-      <div className="d-flex flex-wrap gap-3  justify-content-center align-items-center">
+      <div className="d-flex flex-wrap gap-3 justify-content-center align-items-center">
         {droppedItems.map((item, index) => (
           <div key={index} className="card bg-light" style={{ width: "18rem" }}>
             <div className="card-header">
